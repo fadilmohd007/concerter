@@ -1,0 +1,10 @@
+ragam
+1
+concert_01_01
+2023-12-25
+2023-12-26
+New_York
+2
+JohnDoe
+john.doe@example.com
+9846467321
