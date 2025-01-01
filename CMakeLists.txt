@@ -10,6 +10,7 @@ project(concerter)
 # Add the executable and specify the C file(s) to compile
 add_executable(concerter
                 classes/program.cpp
+                classes/event.cpp
                 main.cpp
                 )
 

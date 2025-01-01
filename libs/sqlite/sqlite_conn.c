@@ -1,17 +1,19 @@
-#include "sqlite_conn.h"
 #include <stdio.h>
 #include <sqlite3.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "sqlite_conn.h"
 
 const char *sqlTicketTableCreate =
     "CREATE TABLE IF NOT EXISTS Ticket ("
     "ticketId INTEGER PRIMARY KEY, "
     "eventId INTEGER, "
-    "FOREIGN KEY(eventId) REFERENCES Event(eventId), "
     "entryCount INTEGER, "
     "entriesLeft INTEGER, "
     "isVIP INTEGER, "
     "attendeeId INTEGER, "
+    "FOREIGN KEY(eventId) REFERENCES Event(eventId), "
     "FOREIGN KEY(attendeeId) REFERENCES Attendee(attendeeId));";
 
 const char *sqlEventTableCreate =
@@ -27,13 +29,14 @@ const char *sqlGroupTableCreate =
     "groupId INTEGER PRIMARY KEY, "
     "groupName TEXT);";
 
-const char *sqlAttendeeTableCreate = "CREATE TABLE IF NOT EXISTS Attendee ("
-                                     "attendeeId INTEGER PRIMARY KEY, "
-                                     "name TEXT, "
-                                     "email TEXT UNIQUE, "
-                                     "mobileNum TEXT UNIQUE, "
-                                     "groupId INTEGER, "
-                                     "FOREIGN KEY(groupId) REFERENCES GroupTable(groupId) ON DELETE SET NULL);";
+const char *sqlAttendeeTableCreate = 
+    "CREATE TABLE IF NOT EXISTS Attendee ("
+    "attendeeId INTEGER PRIMARY KEY, "
+    "name TEXT, "
+    "email TEXT UNIQUE, "
+    "mobileNum TEXT UNIQUE, "
+    "groupId INTEGER, "
+    "FOREIGN KEY(groupId) REFERENCES GroupTable(groupId) ON DELETE SET NULL);";
 
 // GENERIC
 int CreateDB(char *dbName, sqlite3 **db)
@@ -179,7 +182,7 @@ int SaveEvent(sqlite3 *db, const char *eventName, const char *eventStartDate, co
     return SQLITE_OK;
 }
 
-int GetEventById(sqlite3 *db, int eventId)
+int GetEventById(sqlite3 *db, event_t *event,  int eventId)
 {
     const char *select_sql = "SELECT eventId, eventName, eventStartDate, eventEndDate, eventLocation FROM Event WHERE eventId = ?;";
     sqlite3_stmt *stmt;
@@ -207,11 +210,18 @@ int GetEventById(sqlite3 *db, int eventId)
     if (rc == SQLITE_ROW)
     {
         printf("Event found with the given ID.\n");
-        // printf("Event ID: %d\n", sqlite3_column_int(stmt, 0));
-        // printf("Event Name: %s\n", sqlite3_column_text(stmt, 1));
-        // printf("Event Start Date: %s\n", sqlite3_column_text(stmt, 2));
-        // printf("Event End Date: %s\n", sqlite3_column_text(stmt, 3));
-        // printf("Event Location: %s\n", sqlite3_column_text(stmt, 4));
+        event->eventId = sqlite3_column_int(stmt, 0);
+        const char *eventName = (const char *)sqlite3_column_text(stmt, 1);
+        strcpy(event->eventName, eventName);
+
+        const char *startDate = (const char *)sqlite3_column_text(stmt, 2);
+        strcpy(event->eventStartDate, startDate);
+
+        const char *endDate = (const char *)sqlite3_column_text(stmt, 3);
+        strcpy(event->eventEndDate, endDate);
+
+        const char *location = (const char *)sqlite3_column_text(stmt, 4);
+        strcpy(event->eventLocation, location);
     }
     else
     {
@@ -224,6 +234,7 @@ int GetEventById(sqlite3 *db, int eventId)
     // Return success
     return SQLITE_OK;
 }
+
 
 int GetEventByName(sqlite3 *db, const char *eventName)
 {
