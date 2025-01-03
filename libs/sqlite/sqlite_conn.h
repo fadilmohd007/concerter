@@ -30,7 +30,8 @@ int SaveEvent(sqlite3 *db, const char *eventName, const char *eventDate, const c
 int GetEventById(sqlite3 *db, event_t *event,  int eventId);
 int GetEventByName(sqlite3 *db, const char *eventName);
 
-int SaveAttendee(sqlite3 *db, const char *name, const char *email, const char *mobileNum, int groupId);
+int SaveAttendee(sqlite3 *db, const char *name, const char *email, const char *mobileNum, const char *groupName);
+int SaveAttendeeFromCSV(sqlite3 *db, const char *filePath);
 int GetAttendeeById(sqlite3 *db, int attendeeId);
 int GetAttendeeByName(sqlite3 *db, const char *name);
 

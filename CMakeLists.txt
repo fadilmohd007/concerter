@@ -7,10 +7,16 @@ set(CMAKE_CPP_STANDARD 11)
 # Set the project name
 project(concerter)
 
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 # Add the executable and specify the C file(s) to compile
 add_executable(concerter
                 classes/program.cpp
                 classes/event.cpp
+                classes/attendee.cpp
                 main.cpp
                 )
 

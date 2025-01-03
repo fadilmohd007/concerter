@@ -1,5 +1,7 @@
 ragam
 1
+4
+../input_atetndee.csv
 1
 concert_01_01
 2023-12-25 00:00:00

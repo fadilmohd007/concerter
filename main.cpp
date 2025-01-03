@@ -5,6 +5,7 @@
 #include "sqlite_conn.h"
 #include "program.h"
 #include "event.h"
+#include "attendee.h"
 
 using namespace std;
 
@@ -40,7 +41,7 @@ enter_option:
             1. Add Event\n\
             2. Add Attendee\n\
             3. Add Ticket\n\
-            4. Verify Ticket\n\
+            4. Add Attendee from CSV\n\
             5. Exit\n";
     cin >> option;
     printf("option selected: %d\n", option);
@@ -161,6 +162,14 @@ enter_option:
         // SaveTicket(db, ticketId, eventId, entryCount, entriesLeft, isVIP, attendee);
         // GetTicketById(db, ticketId);
         // GetTicketByEventId(db, eventId);
+        break;
+    }
+    case 4:
+    {
+        string filePath;
+        cout << "Enter the file path for attendee CSV:" << "\n";
+        cin >> filePath;
+        SaveAttendeeFromCSV(db, filePath.c_str());
         break;
     }
     default:

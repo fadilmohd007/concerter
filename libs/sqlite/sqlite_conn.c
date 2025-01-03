@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 #include "sqlite_conn.h"
 
 const char *sqlTicketTableCreate =
@@ -24,10 +25,6 @@ const char *sqlEventTableCreate =
     "eventEndDate TEXT, "
     "eventLocation TEXT);";
 
-const char *sqlGroupTableCreate =
-    "CREATE TABLE IF NOT EXISTS GroupTable ("
-    "groupId INTEGER PRIMARY KEY, "
-    "groupName TEXT);";
 
 const char *sqlAttendeeTableCreate = 
     "CREATE TABLE IF NOT EXISTS Attendee ("
@@ -35,8 +32,7 @@ const char *sqlAttendeeTableCreate =
     "name TEXT, "
     "email TEXT UNIQUE, "
     "mobileNum TEXT UNIQUE, "
-    "groupId INTEGER, "
-    "FOREIGN KEY(groupId) REFERENCES GroupTable(groupId) ON DELETE SET NULL);";
+    "groupName TEXT);";
 
 // GENERIC
 int CreateDB(char *dbName, sqlite3 **db)
@@ -311,9 +307,9 @@ int getNextAttendeeId(sqlite3 *db, int *attendeeId)
     return SQLITE_OK;
 }
 
-int SaveAttendee(sqlite3 *db, const char *name, const char *email, const char *mobileNum, int groupId)
+int SaveAttendee(sqlite3 *db, const char *name, const char *email, const char *mobileNum, const char* groupName)
 {
-    const char *insert_sql = "INSERT INTO Attendee (attendeeId, name, email, mobileNum, groupId) VALUES (?, ?, ?, ?, ?);";
+    const char *insert_sql = "INSERT INTO Attendee (attendeeId, name, email, mobileNum, groupName) VALUES (?, ?, ?, ?, ?);";
     sqlite3_stmt *stmt;
     int attendeeId;
 
@@ -361,11 +357,13 @@ int SaveAttendee(sqlite3 *db, const char *name, const char *email, const char *m
         sqlite3_finalize(stmt);
         return rc;
     }
-    if (groupId == 0)
+    
+    if (groupName == NULL || strcmp(groupName, "") || strcmp(groupName, "\n") == 0)
     {
-        groupId = 0; // Set groupId to 0 if it is NULL
+        groupName = "no_group\n"; // Set groupName to "no_group" if it is NULL or empty
     }
-    rc = sqlite3_bind_int(stmt, 5, groupId); // Bind the group ID
+
+    rc = sqlite3_bind_text(stmt, 5, groupName, -1, SQLITE_STATIC); // Bind the group Name
     if (rc != SQLITE_OK)
     {
         fprintf(stderr, "Failed to bind group ID: %s\n", sqlite3_errmsg(db));
@@ -390,9 +388,40 @@ int SaveAttendee(sqlite3 *db, const char *name, const char *email, const char *m
     return SQLITE_OK;
 }
 
+int SaveAttendeeFromCSV( sqlite3 *db, const char *filePath)
+{
+    FILE *file = fopen(filePath, "r");
+    if (!file)
+    {
+        fprintf(stderr, "Error opening file: %s\n", filePath);
+        return -1;
+    }
+
+    char line[1024];
+    // Skip the header line
+    fgets(line, sizeof(line), file);
+    while (fgets(line, sizeof(line), file))
+    {
+        char *name = strtok(line, ",");
+        char *email = strtok(NULL, ",");
+        char *mobileNum = strtok(NULL, ",");
+        char *groupName = strtok(NULL, ",");
+
+        if (name && email && mobileNum && groupName)
+        {
+            printf("Name: %s, Email: %s, Mobile Number: %s, Group Name: %s\n", name, email, mobileNum, groupName);
+            SaveAttendee(db, name, email, mobileNum, groupName);
+        }
+    }
+
+    fclose(file);
+    return 0;
+}
+
+
 int GetAttendeeById(sqlite3 *db, int attendeeId)
 {
-    const char *select_sql = "SELECT attendeeId, name, email, mobileNum, groupId FROM Attendee WHERE attendeeId = ?;";
+    const char *select_sql = "SELECT attendeeId, name, email, mobileNum, groupName FROM Attendee WHERE attendeeId = ?;";
     sqlite3_stmt *stmt;
     int rc;
 
@@ -417,7 +446,7 @@ int GetAttendeeById(sqlite3 *db, int attendeeId)
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW)
     {
-        printf("Attendee found with the given ID.\n");
+        printf("Attendee found with the given ID:%d.\n", attendeeId);
         // printf("Attendee ID: %d\n", sqlite3_column_int(stmt, 0));
         // printf("Name: %s\n", sqlite3_column_text(stmt, 1));
         // printf("Email: %s\n", sqlite3_column_text(stmt, 2));
@@ -438,7 +467,7 @@ int GetAttendeeById(sqlite3 *db, int attendeeId)
 
 int GetAttendeeByName(sqlite3 *db, const char *name)
 {
-    const char *select_sql = "SELECT attendeeId, name, email, mobileNum, groupId FROM Attendee WHERE name = ?;";
+    const char *select_sql = "SELECT attendeeId, name, email, mobileNum, groupName FROM Attendee WHERE name = ?;";
     sqlite3_stmt *stmt;
     int rc;
 
@@ -463,7 +492,7 @@ int GetAttendeeByName(sqlite3 *db, const char *name)
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW)
     {
-        printf("Attendee found with the given name.\n");
+        printf("Attendee found with the given name:%s.\n", name);
         // printf("Attendee ID: %d\n", sqlite3_column_int(stmt, 0));
         // printf("Name: %s\n", sqlite3_column_text(stmt, 1));
         // printf("Email: %s\n", sqlite3_column_text(stmt, 2));
@@ -661,12 +690,6 @@ int GetTicketByEventId(sqlite3 *db, int eventId)
 int InitAllTables(sqlite3 *db)
 {
     int rc;
-    rc = DBExec(sqlGroupTableCreate, db);
-    if (rc != SQLITE_OK)
-    {
-        return rc;
-    }
-    printf("Group table created\n");
     rc = DBExec(sqlAttendeeTableCreate, db);
     if (rc != SQLITE_OK)
     {

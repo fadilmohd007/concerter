@@ -1,0 +1,20 @@
+name,email,mobileNum,groupName
+John Doe,johndoe@example.com,1234567890,students
+Jane Smith,janesmith@example.com,0987654321,staff
+Alice Johnson,alicejohnson@example.com,5555555555,volunteer
+Bob Brown,bobbrown@example.com,4444444444,
+Charlie Black,charlieblack@example.com,3333333333,students
+Diana White,dianawhite@example.com,2222222222,staff
+Eve Green,evegreen@example.com,1111111111,volunteer
+Frank Blue,frankblue@example.com,6666666666,
+Grace Yellow,graceyellow@example.com,7777777777,students
+Hank Purple,hankpurple@example.com,8888888888,staff
+Ivy Orange,ivyorange@example.com,9999999999,volunteer
+Jack Pink,jackpink@example.com,1010101010,
+Kara Gray,karagray@example.com,2020202020,students
+Leo Red,leored@example.com,3030303030,staff
+Mia Cyan,miacyan@example.com,4040404040,volunteer
+Nina Magenta,ninamagenta@example.com,5050505050,
+Oscar Brown,oscarbrown@example.com,6060606060,students
+Paul White,paulwhite@example.com,7070707070,staff
+Quinn Black,quinnblack@example.com,8080808080,volunteer
