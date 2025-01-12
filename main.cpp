@@ -6,6 +6,7 @@
 #include "program.h"
 #include "event.h"
 #include "attendee.h"
+#include "sqliteHandler.h"
 
 using namespace std;
 
@@ -31,6 +32,7 @@ int main(int argc, char *argv[])
     std::string attendeeName, attendeeEmail;
     std::string attendeeMobile;
     Event event;
+    Attendee attendee;
     int x = 1;
     cout << "Enter the number of operations you want to perform:" << "\n";
     cin >> x;
@@ -91,11 +93,17 @@ enter_option:
         cout << "Date: " << eventStartDate << "\n";
         cout << "End Date: " << eventEndDate << "\n";
         cout << "Location: " << eventLocation << "\n";
-        SaveEvent(db, eventName.c_str(), eventStartDate.c_str(), eventEndDate.c_str(), eventLocation.c_str());
+        event.setEventName(eventName);
+        event.setEventStartDate(eventStartDate);
+        event.setEventEndDate(eventEndDate);
+        event.setEventLocation(eventLocation);
+        saveEvent(db, event);
 
-        event.getEventById(1000, db);
+        event = getEventById(db, 1000 );
         event.printEvent();
-        // GetEventByName(db, "concert_01_01");
+        eventName = "concert_01_01";
+        event = getEventByName(db, eventName);
+        event.printEvent();
 
         break;
     case 2:
@@ -115,9 +123,15 @@ enter_option:
         cout << "Name: " << attendeeName << "\n";
         cout << "Email: " << attendeeEmail << "\n";
         cout << "Mobile: " << attendeeMobile << "\n";
-        SaveAttendee(db, attendeeName.c_str(), attendeeEmail.c_str(), attendeeMobile.c_str(), 0);
-        GetAttendeeById(db, 1000);
-        GetAttendeeByName(db, "JohnDoe");
+        
+        attendee.setAttendeeName(attendeeName);
+        attendee.setAttendeeEmail(attendeeEmail);
+        attendee.setAttendeeMobileNum(attendeeMobile);
+        saveAttendee(db, attendee);
+
+        getAttendeeById(db, 1000);
+        attendeeName = "JohnDoe";
+        getAttendeeByName(db, attendeeName);
         break;
     }
     case 3:
@@ -130,6 +144,13 @@ enter_option:
 
         cout << "Enter eventName" << "\n";
         cin >> eventName;
+        getEventByName(db, eventName);
+        if (eventName != event.getEventName()) {
+            cout << "Event not found. Please check the event name and try again." << "\n";
+            break;
+        }
+        // event.getEventById(eventId, db);
+        event.printEvent();
         cout << "Enter entryCount" << "\n";
         cin >> entryCount;
         cout << "Enter entriesLeft" << "\n";
@@ -138,13 +159,8 @@ enter_option:
         cin >> isVIP;
         cout << "Enter attendeeEmail" << "\n";
         cin >> attendeeEmail;
-        GetEventByName(db, eventName.c_str());
-        // int eventId = GetEventByName(db, eventName.c_str());
-        // if (eventId < 0) {
-        //     cout << "Event not found. Please check the event name and try again." << "\n";
-        //     break;
-        // }
-        // attendee = GetAttendeeByEmail(db, attendeeEmail.c_str());
+
+        attendee = getAttendeeByEmail(db, attendeeEmail);
         // if (attendee.id < 0) {
         //     cout << "Attendee not found. Please check the attendee email and try again." << "\n";
         //     break;

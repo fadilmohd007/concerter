@@ -17,6 +17,8 @@ add_executable(concerter
                 classes/program.cpp
                 classes/event.cpp
                 classes/attendee.cpp
+                services/dateServices.cpp
+                services/sqliteHandler.cpp
                 main.cpp
                 )
 
